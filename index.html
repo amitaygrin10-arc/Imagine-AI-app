@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="rootHtml" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImagineAI Studio</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-50 dark:bg-slate-950 dark:text-slate-50 light:bg-slate-50 light:text-slate-900 min-h-screen font-sans antialiased transition-colors duration-300 relative">
+
+    <!-- FLOATING TOP-CENTER CONTAINER FOR FLOP-DOWN NOTIFICATIONS -->
+    <div id="toast-container" class="fixed top-0 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 max-w-sm w-full p-4 pointer-events-none"></div>
+
+    <div class="flex flex-col md:flex-row min-h-screen w-full">
+        
+        <!-- SIDEBAR CONTAINER -->
+        <aside id="sidebarContainer" class="w-full md:w-[400px] border-b md:border-b-0 border-slate-800 bg-slate-900/50 p-6 flex flex-col justify-between shrink-0 transition-colors duration-300">
+            <div class="space-y-6">
+                <!-- BRANDING HEADER WITH SETTINGS BUTTON -->
+                <div class="flex justify-between items-start w-full gap-4">
+                    <div>
+                        <h1 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
+                            <span id="txt-logo-title">ImagineAI Studio ✨</span>
+                        </h1>
+                        <p class="text-xs text-slate-400 mt-1" id="txt-logo-subtitle">🎨 Create AI images and videos in seconds</p>
+                    </div>
+                    
+                    <button id="btn-settings" class="text-slate-400 hover:text-indigo-400 transition-colors p-2 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl cursor-pointer shrink-0 shadow-sm" title="Settings">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <hr id="sidebar-hr-1" class="border-slate-800" />
+
+                <!-- GENERATION MODE -->
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-mode">⚙️ Generation Mode</label>
+                    <div id="mode-selector-bg" class="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                        
+                        <button id="tab-image" class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all bg-indigo-600 text-white shadow-lg">
+                            <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                            <span id="btn-tab-image">🖼️ Image</span>
+                        </button>
+                        
+                        <button id="tab-video" class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all text-slate-400 hover:text-slate-200">
+                            <i data-lucide="video" class="w-3.5 h-3.5"></i>
+                            <span id="btn-tab-video">🎬 Video</span>
+                        </button>
+                        
+                        <button id="tab-mimic" class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all text-slate-400 hover:text-slate-200">
+                            <i data-lucide="user-round" class="w-3.5 h-3.5"></i>
+                            <span id="btn-tab-mimic">🎭 Mimic</span>
+                        </button>
+
+                        <button id="tab-upscale" class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all text-slate-400 hover:text-slate-200">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                            <span id="btn-tab-upscale">⚡ Enhance</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="enhance-sub-selector" class="space-y-2 hidden">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-enhance-type">🎯 Upscale Target</label>
+                    <div id="enhance-target-bg" class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <button id="enhance-target-image" class="text-xs py-1.5 rounded-md font-medium transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 cursor-pointer">🖼️ Upscale Image</button>
+                        <button id="enhance-target-video" class="text-xs py-1.5 rounded-md font-medium transition-all text-slate-400 hover:text-slate-200 cursor-pointer">🎬 Upscale Video</button>
+                    </div>
+                </div>
+
+                <!-- UPLOAD SECTION -->
+                <div id="upload-section" class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-upload">📁 Source Media (Optional)</label>
+                    <div id="upload-box" class="border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-4 bg-slate-950/50 text-center cursor-pointer transition-colors relative group">
+                        <input type="file" id="fileInput" class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*,video/*" />
+                        <div class="space-y-2 pointer-events-none">
+                            <i data-lucide="upload-cloud" id="upload-icon" class="w-8 h-8 text-slate-500 mx-auto group-hover:text-indigo-400 transition-colors"></i>
+                            <p class="text-xs text-slate-300 font-medium" id="txt-upload-main">Click or drop file here 📤</p>
+                            <p class="text-[10px] text-slate-500" id="txt-upload-sub">Supports PNG, JPG up to 10MB</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROMPT CONTAINER -->
+                <div class="space-y-2" id="prompt-container">
+                    <div class="flex justify-between items-center gap-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-prompt">✍️ Your Prompt</label>
+                        <button id="btn-enhance-prompt" class="text-[11px] bg-slate-800 hover:bg-indigo-950 text-indigo-400 px-2 py-1 rounded-md border border-slate-700 flex items-center gap-1 transition-all cursor-pointer">
+                            <i data-lucide="wand-2" class="w-3 h-3"></i>
+                            <span id="txt-enhance-prompt">🪄 Enhance Prompt</span>
+                        </button>
+                    </div>
+                    <textarea id="promptInput" placeholder="Futuristic city, cyberpunk style, photo-realistic..." class="w-full h-24 px-4 py-3 bg-slate-950 text-sm text-slate-200 placeholder-slate-600 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-colors"></textarea>
+                </div>
+
+                <!-- NEGATIVE CONTAINER -->
+                <div class="space-y-2" id="negative-container">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-negative">🚫 Negative Prompt</label>
+                    <input type="text" id="negativeInput" placeholder="Blurry, low quality, distorted hands..." class="w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 placeholder-slate-700 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+
+                <!-- STYLE CONTAINER -->
+                <div class="space-y-2" id="style-container">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-style">🎭 Art Style</label>
+                    <div class="grid grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1">
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 font-medium cursor-pointer transition-all" data-style="none">✨ Default</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="cinematic">🎬 Cinematic</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="anime">🌸 Anime</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="3d-render">📦 3D Render</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="cyberpunk">🌃 Cyberpunk</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="fantasy">🔮 Fantasy</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="watercolor">🎨 Watercolor</button>
+                        <button type="button" class="style-btn text-xs py-2 rounded-lg border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 font-medium cursor-pointer transition-all" data-style="comic">💥 Comic Book</button>
+                    </div>
+                </div>
+
+                <!-- QUALITY/RESOLUTION SLIDER -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-quality">📊 Resolution & Quality</label>
+                        <span id="quality-badge" class="bg-indigo-500/10 text-indigo-400 text-xs font-bold px-2 py-0.5 rounded-md border border-indigo-500/20 font-mono">740P</span>
+                    </div>
+                    <div class="relative w-full px-1">
+                        <input type="range" id="qualitySlider" min="0" max="6" value="3" step="1" class="w-full accent-indigo-500 bg-slate-800 h-2 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-[9px] text-slate-600 mt-1 font-mono px-0.5">
+                            <span id="tick-0">180p</span>
+                            <span id="tick-1">260p</span>
+                            <span id="tick-2">520p</span>
+                            <span id="tick-3" class="text-indigo-400 font-bold">740p</span>
+                            <span id="tick-4">1080p</span>
+                            <span id="tick-5">2K</span>
+                            <span id="tick-6">4K</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LAYOUT SETTINGS GRID -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-ratio">📐 Aspect Ratio</label>
+                        <div id="ratio-selector-bg" class="grid grid-cols-3 gap-1 text-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button type="button" id="ratio-1" class="ratio-btn text-[11px] py-1.5 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 cursor-pointer">1:1</button>
+                            <button type="button" id="ratio-2" class="ratio-btn text-[11px] py-1.5 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer">16:9</button>
+                            <button type="button" id="ratio-3" class="ratio-btn text-[11px] py-1.5 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer">9:16</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2" id="batch-container">
+                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-batch">🔢 Batch Count</label>
+                        <div id="batch-selector-bg" class="grid grid-cols-4 gap-1 text-center bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button type="button" class="batch-btn text-[11px] py-1.5 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 cursor-pointer" data-batch="1">1</button>
+                            <button type="button" class="batch-btn text-[11px] py-1.5 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer" data-batch="2">2</button>
+                            <button type="button" class="batch-btn text-[11px] py-1.5 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer" data-batch="3">3</button>
+                            <button type="button" class="batch-btn text-[11px] py-1.5 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer" data-batch="4">4</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MAIN TRIGGER ACTION BUTTON -->
+                <button type="button" id="generateBtn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-medium py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/10 active:scale-[0.98] cursor-pointer">
+                    <i data-lucide="sparkles" id="btn-main-icon" class="w-5 h-5"></i>
+                    <span id="txt-btn-generate">🚀 Generate Image</span>
+                    <span id="cost-badge" class="bg-black/30 text-[11px] font-mono px-2 py-0.5 rounded-md border border-white/10 shrink-0 mr-1 ml-1">5 🪙</span>
+                </button>
+            </div>
+
+            <div id="sidebar-footer" class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 transition-colors">
+                <span id="txt-plan">💎 Free Plan</span>
+                <span class="bg-slate-800 text-slate-200 px-2 py-1 rounded-md font-mono" id="txt-credits">10 / 10 Credits Left 🪙</span>
+            </div>
+        </aside>
+
+        <!-- MAIN MAIN VIEWER CONTENT -->
+        <main id="mainContainer" class="flex-1 bg-slate-950 p-8 transition-colors duration-300">
+            <div class="max-w-6xl mx-auto space-y-8">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100 tracking-tight flex items-center gap-2" id="txt-gallery-title">
+                        <i data-lucide="folder-heart" class="text-indigo-400 w-5 h-5"></i>
+                        <span>🗂️ Your Projects & Gallery</span>
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-1" id="txt-gallery-subtitle">✨ Everything you generate will be saved here automatically</p>
+                </div>
+
+                <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div id="card-sample-1" class="bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group relative hover:border-slate-700/50 transition-all duration-300">
+                        <div class="aspect-square w-full bg-slate-950 relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600" class="object-cover w-full h-full cursor-pointer group-hover:scale-[1.02] transition-transform duration-500" onclick="openLightbox(this.src)">
+                            <div class="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
+                                <button onclick="copyText('Abstract digital art, vibrant neon colors, flowing waves')" class="p-2 bg-slate-950/80 hover:bg-indigo-600 rounded-xl text-slate-200 border border-slate-800 transition-all cursor-pointer" title="Copy Prompt">
+                                    <i data-lucide="copy" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="downloadMedia('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1080', 'project-7384.jpg')" class="p-2 bg-slate-950/80 hover:bg-emerald-600 rounded-xl text-slate-200 border border-slate-800 transition-all cursor-pointer" title="Download">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="card-info-1" class="p-4 bg-slate-900/90 flex-1 flex flex-col justify-between gap-3 transition-colors">
+                            <p id="card-txt-1" class="text-xs text-slate-300 italic line-clamp-2">"Abstract digital art, vibrant neon colors, flowing waves"</p>
+                            <div id="card-footer-1" class="flex items-center justify-between pt-2.5 border-t border-slate-800/80">
+                                <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">🖼️ Image</span>
+                                <span class="text-[10px] text-slate-500 font-mono">#7384</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- SETTINGS MODAL (Matches 1780548925436.jpeg Layout Structure Explicitly with custom list) -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 hidden z-50 items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform scale-95 transition-all duration-300" id="settings-content">
+            <div id="settings-header" class="px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <h3 class="text-lg font-bold text-slate-100 flex items-center gap-2" id="lbl-settings-title">
+                    <i data-lucide="settings" class="w-5 h-5 text-indigo-400"></i> Preferences
+                </h3>
+                <button id="close-settings" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+                
+                <!-- NEW CUSTOM FLOP-DOWN LANGUAGE SELECTOR OVERLAY DESIGN -->
+                <div class="space-y-2 relative">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-setting-lang">🌐 Application Language</label>
+                    
+                    <!-- Dropdown Trigger Box -->
+                    <div id="custom-lang-trigger" class="w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-colors flex justify-between items-center">
+                        <span id="custom-lang-label">English (US)</span>
+                        <i data-lucide="chevron-down" id="custom-lang-arrow" class="w-4 h-4 text-slate-400 transition-transform duration-200"></i>
+                    </div>
+
+                    <!-- Flopping Container Viewport Options Menu -->
+                    <div id="custom-lang-dropdown" class="hidden absolute left-0 right-0 mt-1 bg-slate-900 border-2 border-slate-800 rounded-xl overflow-hidden z-50 shadow-2xl transition-all duration-200 origin-top transform scale-y-95 opacity-0">
+                        <div class="divide-y divide-slate-800/60 max-h-[240px] overflow-y-auto" id="lang-options-box">
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="en">
+                                <span>English (US)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="es">
+                                <span>Español (ES)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="fr">
+                                <span>Français (FR)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="de">
+                                <span>Deutsch (DE)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="ja">
+                                <span>日本語 (JA)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="pt">
+                                <span>Português (PT)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                            <div class="lang-option px-4 py-3 text-sm text-slate-200 hover:bg-slate-950 cursor-pointer flex items-center justify-between transition-colors" data-value="he" dir="rtl">
+                                <span>עברית (HE)</span>
+                                <div class="radio-dot w-4 h-4 rounded-full border border-slate-700 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-indigo-500 hidden"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THEME SETTING -->
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-setting-theme">🎨 Display Theme</label>
+                    <div id="theme-selector-bg" class="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                        <button type="button" id="theme-light" class="text-xs py-2 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer font-medium transition-all">☀️ Light</button>
+                        <button type="button" id="theme-dark" class="text-xs py-2 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer font-medium transition-all">🌙 Dark</button>
+                        <button type="button" id="theme-auto" class="text-xs py-2 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer font-medium transition-all">💻 Auto</button>
+                    </div>
+                </div>
+
+                <hr id="settings-hr" class="border-slate-800" />
+
+                <!-- API KEY SETTING -->
+                <div class="space-y-2">
+                    <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="lbl-setting-key">🔑 Custom API Key (Optional)</label>
+                    <input type="password" id="setting-key-input" placeholder="sk-..." class="w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 placeholder-slate-700 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+
+                <!-- AUTO-SAVE SETTING -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-slate-200" id="lbl-setting-save">Auto-Save Gallery</p>
+                        <p class="text-xs text-slate-500" id="lbl-setting-save-sub">Save generated media locally</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </label>
+                </div>
+            </div>
+            <div id="settings-footer" class="px-6 py-4 border-t border-slate-800 bg-slate-950 flex justify-end">
+                <button id="save-settings" class="bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-6 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] cursor-pointer">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX IMAGES VIEWPORT -->
+    <div id="lightbox" class="fixed inset-0 bg-black/90 hidden z-50 items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
+        <button class="absolute top-4 right-4 text-white p-2 bg-slate-900/50 rounded-full cursor-pointer"><i data-lucide="x" class="w-6 h-6"></i></button>
+        <img id="lightboxImg" src="" class="max-w-full max-h-[90vh] rounded-xl shadow-2xl object-contain">
+    </div>
+
+    <script>
+        let activeMode = 'image'; 
+        let enhanceTarget = 'image'; 
+        let currentBatch = 1; 
+        let currentTheme = 'dark';
+        let currentLang = 'en';
+
+        // Translation Dictionary Packs
+        const i18n = {
+            en: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 Create AI images and videos in seconds",
+                mode: "⚙️ Generation Mode", tabImg: "🖼️ Image", tabVid: "🎬 Video", tabMimic: "🎭 Mimic", tabUpscale: "⚡ Enhance",
+                upscaleTarget: "🎯 Upscale Target", uploadLbl: "📁 Source Media (Optional)", uploadMain: "Click or drop file here 📤",
+                prompt: "✍️ Your Prompt", enhanceBtn: "🪄 Enhance Prompt", placeholderPrompt: "Futuristic city, cyberpunk style, photo-realistic...",
+                negative: "🚫 Negative Prompt", style: "🎭 Art Style", quality: "📊 Resolution & Quality", ratio: "📐 Aspect Ratio",
+                batch: "🔢 Batch Count", generateImg: "🚀 Generate Image", generateVid: "🚀 Generate Video", runMimic: "🎭 Run Mimic Motion",
+                upscaleImgBtn: "⚡ Upscale Image", upscaleVidBtn: "⚡ Upscale Video", freePlan: "💎 Free Plan", credits: "Credits Left 🪙",
+                galleryTitle: "🗂️ Your Projects & Gallery", gallerySub: "✨ Everything you generate will be saved here automatically",
+                settingsTitle: "Preferences", settingLang: "🌐 Application Language", settingTheme: "🎨 Display Theme",
+                settingKey: "🔑 Custom API Key (Optional)", settingSave: "Auto-Save Gallery", settingSaveSub: "Save generated media locally",
+                alertSaved: "⚙️ Preferences updated successfully!", alertCopied: "📋 Prompt copied to clipboard!", alertDone: "✨ Generation complete and added to gallery!"
+            },
+            es: {
+                title: "Estudio ImagineAI ✨", subtitle: "🎨 Crea imágenes y videos con IA en segundos",
+                mode: "⚙️ Modo de Generación", tabImg: "🖼️ Imagen", tabVid: "🎬 Video", tabMimic: "🎭 Imitar", tabUpscale: "⚡ Mejorar",
+                upscaleTarget: "🎯 Objetivo de Mejora", uploadLbl: "📁 Archivo de Origen (Opcional)", uploadMain: "Haz clic o arrastra un archivo aquí 📤",
+                prompt: "✍️ Tu Indicación (Prompt)", enhanceBtn: "🪄 Optimizar Prompt", placeholderPrompt: "Ciudad futurista, estilo cyberpunk, fotorrealista...",
+                negative: "🚫 Prompt Negativo", style: "🎭 Estilo de Arte", quality: "📊 Resolución y Calidad", ratio: "📐 Relación de Aspecto",
+                batch: "🔢 Cantidad de Lotes", generateImg: "🚀 Generar Imagen", generateVid: "🚀 Generar Video", runMimic: "🎭 Ejecutar Mimic",
+                upscaleImgBtn: "⚡ Escalar Imagen", upscaleVidBtn: "⚡ Escalar Video", freePlan: "💎 Plan Gratuito", credits: "Créditos Restantes 🪙",
+                galleryTitle: "🗂️ Tus Proyectos y Galería", gallerySub: "✨ Todo lo que generes se guardará aquí automáticamente",
+                settingsTitle: "Preferencias", settingLang: "🌐 Idioma de la Aplicación", settingTheme: "🎨 Tema de Pantalla",
+                settingKey: "🔑 Clave API Personalizada (Opcional)", settingSave: "Guardar Galería", settingSaveSub: "Guardar arquivos multimedia localmente",
+                alertSaved: "⚙️ ¡Preferencias actualizadas con éxito!", alertCopied: "📋 ¡Prompt copiado al portapapeles!", alertDone: "✨ ¡Generación completada y añadida a tu galerie!"
+            },
+            fr: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 Créez des images et vidéos IA en quelques secondes",
+                mode: "⚙️ Mode de Génération", tabImg: "🖼️ Image", tabVid: "🎬 Vidéo", tabMimic: "🎭 Mimique", tabUpscale: "⚡ Améliorer",
+                upscaleTarget: "🎯 Cible d'Amélioration", uploadLbl: "📁 Média Source (Optionnel)", uploadMain: "Cliquez ou glissez un fichier ici 📤",
+                prompt: "✍️ Votre Prompt", enhanceBtn: "🪄 Améliorer Prompt", placeholderPrompt: "Ville futuriste, style cyberpunk, réaliste...",
+                negative: "🚫 Prompt Négatif", style: "🎭 Style Artistique", quality: "📊 Résolution & Qualité", ratio: "📐 Format d'Image",
+                batch: "🔢 Nombre de Lots", generateImg: "🚀 Générer l'Image", generateVid: "🚀 Générer la Vidéo", runMimic: "🎭 Lancer la Mimique",
+                upscaleImgBtn: "⚡ Améliorer l'Image", upscaleVidBtn: "⚡ Améliorer la Vidéo", freePlan: "💎 Plan Gratuit", credits: "Crédits Restantes 🪙",
+                galleryTitle: "🗂️ Vos Projets & Galerie", gallerySub: "✨ Tout ce que vous générez sera sauvegardé automatiquement ici",
+                settingsTitle: "Préférences", settingLang: "🌐 Langue de l'Application", settingTheme: "🎨 Thème d'Affichage",
+                settingKey: "🔑 Clé API Personnalisée (Optionnel)", settingSave: "Sauvegarde Auto", settingSaveSub: "Enregistrer localement",
+                alertSaved: "⚙️ Préférences mises à jour avec succès !", alertCopied: "📋 Prompt copié dans le presse-papiers !", alertDone: "✨ Génération terminée et ajoutée à la galerie !"
+            },
+            de: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 Erstellen Sie KI-Bilder und -Videos in Sekundenschnelle",
+                mode: "⚙️ Generationsmodus", tabImg: "🖼️ Bild", tabVid: "🎬 Video", tabMimic: "🎭 Mimik", tabUpscale: "⚡ Verbessern",
+                upscaleTarget: "🎯 Skalierungsziel", uploadLbl: "📁 Quellmedien (Optional)", uploadMain: "Klicken oder Datei hierher ziehen 📤",
+                prompt: "✍️ Ihr Prompt", enhanceBtn: "🪄 Prompt Optimieren", placeholderPrompt: "Futuristische Stadt, Cyberpunk-Stil, fotorealistisch...",
+                negative: "🚫 Negativer Prompt", style: "🎭 Kunststil", quality: "📊 Auflösung & Qualität", ratio: "📐 Seitenverhältnis",
+                batch: "🔢 Stapelanzahl", generateImg: "🚀 Bild Generieren", generateVid: "🚀 Video Generieren", runMimic: "🎭 Mimik Ausführen",
+                upscaleImgBtn: "⚡ Bild Hochskalieren", upscaleVidBtn: "⚡ Video Hochskalieren", freePlan: "💎 Kostenloser Plan", credits: "Credits Übrig 🪙",
+                galleryTitle: "🗂️ Ihre Projekte & Galerie", gallerySub: "✨ Alles, was Sie generieren, wird hier automatisch gespeichert",
+                settingsTitle: "Einstellungen", settingLang: "🌐 Anwendungssprache", settingTheme: "🎨 Anzeige-Design",
+                settingKey: "🔑 Benutzerdefinierter API-Schlüssel (Optional)", settingSave: "Galerie Auto-Speichern", settingSaveSub: "Medien lokal speichern",
+                alertSaved: "⚙️ Einstellungen erfolgreich aktualisiert!", alertCopied: "📋 Prompt in die Zwischenablage kopiert!", alertDone: "✨ Generierung abgeschlossen und zur Galerie hinzugefügt!"
+            },
+            ja: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 数秒でAI画像と動画を作成",
+                mode: "⚙️ 生成モード", tabImg: "🖼️ 画像", tabVid: "🎬 動画", tabMimic: "🎭 ミミック", tabUpscale: "⚡ アップスケール",
+                upscaleTarget: "🎯 対象の選択", uploadLbl: "📁 ソースメディア (任意)", uploadMain: "クリックまたはファイルをドロップ 📤",
+                prompt: "✍️ プロンプト", enhanceBtn: "🪄 プロンプトを強化", placeholderPrompt: "未来都市、サイバーパンクスタイル、リアル...",
+                negative: "🚫 ネガティブプロンプト", style: "🎭 アートスタイル", quality: "📊 解像度と品質", ratio: "📐 アスペクト比",
+                batch: "🔢 バッチ数", generateImg: "🚀 画像を生成", generateVid: "🚀 動画を生成", runMimic: "🎭 ミミックを実行",
+                upscaleImgBtn: "⚡ 画像をアップスケール", upscaleVidBtn: "⚡ 動画をアップスケール", freePlan: "💎 無料プラン", credits: "残りクレジット 🪙",
+                galleryTitle: "🗂️ プロジェクトとギャラリー", gallerySub: "✨ 生成されたコンテンツはすべてここに自動保存されます",
+                settingsTitle: "環境設定", settingLang: "🌐 アプリケーション言語", settingTheme: "🎨 ディスプレイテーマ",
+                settingKey: "🔑 カスタムAPIキー (任意)", settingSave: "ギャラリーを自動保存", settingSaveSub: "生成されたメディアをローカルに保存",
+                alertSaved: "⚙️ 設定を更新しました！", alertCopied: "📋 プロンプトをクリップボードにコピーしました！", alertDone: "✨ 生成が完了し、ギャラリーに追加されました！"
+            },
+            pt: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 Crie imagens e vídeos com IA em segundos",
+                mode: "⚙️ Modo de Geração", tabImg: "🖼️ Imagem", tabVid: "🎬 Vídeo", tabMimic: "🎭 Mimicar", tabUpscale: "⚡ Aprimorar",
+                upscaleTarget: "🎯 Alvo de Redimensionamento", uploadLbl: "📁 Mídia de Origem (Opcional)", uploadMain: "Clique ou arraste um arquivo aqui 📤",
+                prompt: "✍️ Seu Prompt", enhanceBtn: "🪄 Otimizar Prompt", placeholderPrompt: "Cidade futurista, estilo cyberpunk, fotorrealista...",
+                negative: "🚫 Prompt Negativo", style: "🎭 Estilo de Arte", quality: "📊 Resolução & Qualidade", ratio: "📐 Proporção",
+                batch: "🔢 Quantidade de Lotes", generateImg: "🚀 Gerar Imagem", generateVid: "🚀 Gerar Vídeo", runMimic: "🎭 Executar Mimic",
+                upscaleImgBtn: "⚡ Redimensionar Imagem", upscaleVidBtn: "⚡ Redimensionar Vídeo", freePlan: "💎 Plan Gratuito", credits: "Créditos Restantes 🪙",
+                galleryTitle: "🗂️ Seus Projetos & Galeria", gallerySub: "✨ Tudo o que gerar será salvo automaticamente aqui",
+                settingsTitle: "Preferências", settingLang: "🌐 Idioma do Aplicativo", settingTheme: "🎨 Tema de Exibição",
+                settingKey: "🔑 Chave API Personalizada (Opcional)", settingSave: "Salvar Galeria Auto", settingSaveSub: "Salvar mídias localmente",
+                alertSaved: "⚙️ Preferências atualizadas com sucesso!", alertCopied: "📋 Prompt copied to clipboard!", alertDone: "✨ Geração concluída e adicionada à galeria!"
+            },
+            he: {
+                title: "ImagineAI Studio ✨", subtitle: "🎨 יצירת תמונות וסרטוני AI בשניות",
+                mode: "⚙️ מצב יצירה", tabImg: "🖼️ תמונה", tabVid: "🎬 סרטון", tabMimic: "🎭 חיקוי תנועה", tabUpscale: "⚡ שדרוג איכות",
+                upscaleTarget: "🎯 יעד שדרוג", uploadLbl: "📁 מדיה מקורית (אופציונלי)", uploadMain: "לחצו או גררו קובץ לכאן 📤",
+                prompt: "✍️ התיאור שלך (Prompt)", enhanceBtn: "🪄 שדרוג התיאור", placeholderPrompt: "עיר עתידנית, סגנון סייברפאנק, פוטו-ראליסטי...",
+                negative: "🚫 תיאור שלילי", style: "🎭 סגנון אמנותי", quality: "📊 רזולוציה ואיכות", ratio: "📐 יחס גובה-רוחב",
+                batch: "🔢 כמות עותקים", generateImg: "🚀 צור תמונה", generateVid: "🚀 צור סרטון", runMimic: "🎭 הפעל חיקוי תנועה",
+                upscaleImgBtn: "⚡ שדרג תמונה", upscaleVidBtn: "⚡ שדרג סרטון", freePlan: "💎 מסלול חינמי", credits: "קרדיטים נותרו 🪙",
+                galleryTitle: "🗂️ הפרויקטים והגלריה שלך", gallerySub: "✨ כל מה שתייצר יישמר כאן אוטומטית",
+                settingsTitle: "העדפות מערכת", settingLang: "🌐 שפת האפליקציה", settingTheme: "🎨 עיצוב תצוגה",
+                settingKey: "🔑 מפתח API מותאם (אופציונלי)", settingSave: "שמירה אוטומטית לגלריה", settingSaveSub: "שמור קבצי מדיה באופן מקומי",
+                alertSaved: "⚙️ ההעדפות עודכנו בהצלחה!", alertCopied: "📋 התיאור הועתק ללוח!", alertDone: "✨ היצירה הושלמה והתווספה לגלריה שלך!"
+            }
+        };
+
+        // CUSTOM FLOP-DOWN TOAST NOTIFICATION FUNCTION
+        function showToast(message) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = currentTheme === 'light' ? 'bg-white border-slate-300 text-slate-950 shadow-md' : 'bg-slate-900 border-slate-800 text-slate-100 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)]';
+            toast.className = `transform -translate-y-12 opacity-0 transition-all duration-500 ease-out pointer-events-auto w-full border-2 px-4 py-3.5 rounded-2xl flex items-center gap-3 text-sm font-semibold ${bgClass}`;
+            
+            toast.setAttribute('dir', currentLang === 'he' ? 'rtl' : 'ltr');
+            toast.innerHTML = `
+                <div class="p-1 rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-1 truncate">${message}</div>
+            `;
+            
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.classList.remove('-translate-y-12', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-12', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            }, 3200);
+        }
+
+        // Element Selectors
+        const qualitySlider = document.getElementById('qualitySlider');
+        const qualityBadge = document.getElementById('quality-badge');
+        const costBadge = document.getElementById('cost-badge');
+
+        const resolutions = ["180p", "260p", "520p", "740p", "1080p", "2k", "4k"];
+        const qualityModifiers = { 0: -4, 1: -3, 2: -1, 3: 0, 4: 2, 5: 4, 6: 6 };
+
+        const tabImg = document.getElementById('tab-image');
+        const tabVid = document.getElementById('tab-video');
+        const tabMimic = document.getElementById('tab-mimic');
+        const tabUpscale = document.getElementById('tab-upscale');
+        const enhanceSubSelector = document.getElementById('enhance-sub-selector');
+
+        const lblUpload = document.getElementById('lbl-upload');
+        const txtUploadMain = document.getElementById('txt-upload-main');
+        const promptInput = document.getElementById('promptInput');
+        const txtBtnGenerate = document.getElementById('txt-btn-generate');
+        const fileInput = document.getElementById('fileInput');
+
+        const promptContainer = document.getElementById('prompt-container');
+        const negativeContainer = document.getElementById('negative-container');
+        const styleContainer = document.getElementById('style-container');
+        const batchContainer = document.getElementById('batch-container');
+
+        const targetImgBtn = document.getElementById('enhance-target-image');
+        const targetVidBtn = document.getElementById('enhance-target-video');
+
+        const activeClass = "flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all bg-indigo-600 text-white shadow-lg";
+        const inactiveClassDark = "flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all text-slate-400 hover:text-slate-200";
+        const inactiveClassLight = "flex flex-col items-center justify-center gap-1 py-2 rounded-lg text-[10px] sm:text-xs font-medium cursor-pointer transition-all text-slate-500 hover:text-slate-800";
+        
+        const subActive = "text-xs py-1.5 rounded-md font-medium transition-all bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 cursor-pointer";
+        const subInactiveDark = "text-xs py-1.5 rounded-md font-medium transition-all text-slate-400 hover:text-slate-200 border border-transparent cursor-pointer";
+        const subInactiveLight = "text-xs py-1.5 rounded-md font-medium transition-all text-slate-500 hover:text-slate-800 border border-transparent cursor-pointer";
+
+        function calculateTotalCost() {
+            let baseCost = 5; 
+            if (activeMode === 'video') baseCost = 10; 
+            if (activeMode === 'mimic') baseCost = 20;
+            if (activeMode === 'upscale') {
+                baseCost = (enhanceTarget === 'image') ? 7 : 10;
+            }
+
+            const sliderIndex = parseInt(qualitySlider.value);
+            qualityBadge.innerText = resolutions[sliderIndex].toUpperCase();
+
+            for (let i = 0; i <= 6; i++) {
+                const tick = document.getElementById(`tick-${i}`);
+                if (tick) {
+                    tick.className = (i === sliderIndex) ? "text-indigo-400 font-bold transition-all scale-110" : (currentTheme === 'light' ? "text-slate-400" : "text-slate-600");
+                }
+            }
+
+            const modifier = qualityModifiers[sliderIndex] || 0;
+            let singleCost = baseCost + modifier;
+            if (singleCost < 1) singleCost = 1;
+
+            let totalCost = singleCost * currentBatch;
+            costBadge.innerText = `${totalCost} 🪙`;
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const dict = i18n[lang];
+            const root = document.getElementById('rootHtml');
+            const sidebar = document.getElementById('sidebarContainer');
+            
+            if (lang === 'he') {
+                root.setAttribute('dir', 'rtl');
+                root.setAttribute('lang', 'he');
+                sidebar.style.borderRightWidth = '0px';
+                if(window.innerWidth >= 768) sidebar.style.borderLeftWidth = '1px';
+                document.getElementById('custom-lang-trigger').setAttribute('dir', 'rtl');
+                document.getElementById('custom-lang-dropdown').setAttribute('dir', 'rtl');
+            } else {
+                root.setAttribute('dir', 'ltr');
+                root.setAttribute('lang', lang);
+                sidebar.style.borderLeftWidth = '0px';
+                if(window.innerWidth >= 768) sidebar.style.borderRightWidth = '1px';
+                document.getElementById('custom-lang-trigger').setAttribute('dir', 'ltr');
+                document.getElementById('custom-lang-dropdown').setAttribute('dir', 'ltr');
+            }
+            
+            document.getElementById('txt-logo-title').innerText = dict.title;
+            document.getElementById('txt-logo-subtitle').innerText = dict.subtitle;
+            document.getElementById('lbl-mode').innerText = dict.mode;
+            document.getElementById('btn-tab-image').innerText = dict.tabImg;
+            document.getElementById('btn-tab-video').innerText = dict.tabVid;
+            document.getElementById('btn-tab-mimic').innerText = dict.tabMimic;
+            document.getElementById('btn-tab-upscale').innerText = dict.tabUpscale;
+            document.getElementById('lbl-enhance-type').innerText = dict.upscaleTarget;
+            document.getElementById('lbl-prompt').innerText = dict.prompt;
+            document.getElementById('txt-enhance-prompt').innerText = dict.enhanceBtn;
+            document.getElementById('lbl-negative').innerText = dict.negative;
+            document.getElementById('lbl-style').innerText = dict.style;
+            document.getElementById('lbl-quality').innerText = dict.quality;
+            document.getElementById('lbl-ratio').innerText = dict.ratio;
+            document.getElementById('lbl-batch').innerText = dict.batch;
+            document.getElementById('txt-plan').innerText = dict.freePlan;
+            document.getElementById('txt-gallery-title').querySelector('span').innerText = dict.galleryTitle;
+            document.getElementById('txt-gallery-subtitle').innerText = dict.gallerySub;
+            
+            document.getElementById('lbl-settings-title').innerHTML = `<i data-lucide="settings" class="w-5 h-5 text-indigo-400"></i> ${dict.settingsTitle}`;
+            document.getElementById('lbl-setting-lang').innerText = dict.settingLang;
+            document.getElementById('lbl-setting-theme').innerText = dict.settingTheme;
+            document.getElementById('lbl-setting-key').innerText = dict.settingKey;
+            document.getElementById('lbl-setting-save').innerText = dict.settingSave;
+            document.getElementById('lbl-setting-save-sub').innerText = dict.settingSaveSub;
+
+            updateUIForMode(activeMode);
+            updateCustomLangSelectionUI(lang);
+        }
+
+        // CUSTOM ENGINE LANGUAGE MODIFIER PREFERENCE SYNCS
+        const customLangTrigger = document.getElementById('custom-lang-trigger');
+        const customLangDropdown = document.getElementById('custom-lang-dropdown');
+        const customLangArrow = document.getElementById('custom-lang-arrow');
+        const customLangLabel = document.getElementById('custom-lang-label');
+        const langOptions = document.querySelectorAll('.lang-option');
+
+        function toggleCustomLangDropdown() {
+            const isHidden = customLangDropdown.classList.contains('hidden');
+            if (isHidden) {
+                customLangDropdown.classList.remove('hidden');
+                customLangArrow.classList.add('rotate-180');
+                setTimeout(() => {
+                    customLangDropdown.classList.remove('scale-y-95', 'opacity-0');
+                    customLangDropdown.classList.add('scale-y-100', 'opacity-100');
+                }, 10);
+            } else {
+                closeCustomLangDropdown();
+            }
+        }
+
+        function closeCustomLangDropdown() {
+            customLangDropdown.classList.remove('scale-y-100', 'opacity-100');
+            customLangDropdown.classList.add('scale-y-95', 'opacity-0');
+            customLangArrow.classList.remove('rotate-180');
+            setTimeout(() => {
+                customLangDropdown.classList.add('hidden');
+            }, 200);
+        }
+
+        function updateCustomLangSelectionUI(selectedLang) {
+            langOptions.forEach(opt => {
+                const val = opt.getAttribute('data-value');
+                const radioInner = opt.querySelector('.radio-dot > div');
+                const radioContainer = opt.querySelector('.radio-dot');
+                
+                if (val === selectedLang) {
+                    customLangLabel.innerText = opt.querySelector('span').innerText;
+                    radioInner.classList.remove('hidden');
+                    radioContainer.className = "radio-dot w-4 h-4 rounded-full border border-indigo-500 flex items-center justify-center bg-indigo-500/10";
+                    opt.classList.add('bg-slate-950/40');
+                } else {
+                    radioInner.classList.add('hidden');
+                    radioContainer.className = `radio-dot w-4 h-4 rounded-full border flex items-center justify-center ${currentTheme === 'light' ? 'border-slate-300' : 'border-slate-700'}`;
+                    opt.classList.remove('bg-slate-950/40');
+                }
+            });
+        }
+
+        customLangTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleCustomLangDropdown();
+        });
+
+        langOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const val = option.getAttribute('data-value');
+                applyLanguage(val);
+                closeCustomLangDropdown();
+            });
+        });
+
+        // Close when clicking outside preferences
+        document.addEventListener('click', (e) => {
+            if (!customLangTrigger.contains(e.target) && !customLangDropdown.contains(e.target)) {
+                closeCustomLangDropdown();
+            }
+        });
+
+        function applyTheme(theme) {
+            currentTheme = theme;
+            const root = document.documentElement;
+            const body = document.body;
+            const sidebar = document.getElementById('sidebarContainer');
+            const main = document.getElementById('mainContainer');
+            const modal = document.getElementById('settings-content');
+            
+            let actualMode = theme;
+            if (theme === 'auto') {
+                actualMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            ['theme-light', 'theme-dark', 'theme-auto'].forEach(id => {
+                document.getElementById(id).className = "text-xs py-2 rounded-lg border border-transparent text-slate-400 hover:bg-slate-900 cursor-pointer font-medium";
+            });
+            document.getElementById(`theme-${theme}`).className = "text-xs py-2 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 cursor-pointer font-medium";
+
+            if (actualMode === 'light') {
+                currentTheme = 'light';
+                root.classList.remove('dark');
+                
+                body.className = "bg-slate-50 text-slate-900 min-h-screen font-sans antialiased transition-colors duration-300 relative";
+                sidebar.className = "w-full md:w-[400px] border-b md:border-b-0 border-slate-200 bg-slate-100 p-6 flex flex-col justify-between shrink-0 transition-colors duration-300";
+                main.className = "flex-1 bg-slate-50 p-8 transition-colors duration-300";
+                modal.className = "bg-white border border-slate-300 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform scale-100 transition-all duration-300 text-slate-900";
+                
+                document.getElementById('settings-header').className = "px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50";
+                document.getElementById('settings-footer').className = "px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end";
+                
+                // Light mode layout variations for custom overlay
+                document.getElementById('custom-lang-trigger').className = "w-full px-4 py-2.5 bg-white text-sm text-slate-800 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-colors flex justify-between items-center";
+                document.getElementById('custom-lang-dropdown').className = "hidden absolute left-0 right-0 mt-1 bg-white border-2 border-slate-200 rounded-xl overflow-hidden z-50 shadow-2xl transition-all duration-200 origin-top transform scale-y-95 opacity-0";
+                document.getElementById('lang-options-box').className = "divide-y divide-slate-100 max-h-[240px] overflow-y-auto";
+                document.querySelectorAll('.lang-option').forEach(el => {
+                    el.classList.remove('text-slate-200', 'hover:bg-slate-950');
+                    el.classList.add('text-slate-700', 'hover:bg-slate-50');
+                });
+
+                document.getElementById('setting-key-input').className = "w-full px-4 py-2.5 bg-white text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500";
+                document.getElementById('btn-settings').className = "text-slate-600 hover:text-indigo-600 transition-colors p-2 bg-white border border-slate-200 hover:border-slate-300 rounded-xl cursor-pointer shrink-0 shadow-sm";
+                document.getElementById('sidebar-hr-1').className = "border-slate-200";
+                document.getElementById('settings-hr').className = "border-slate-200";
+                document.getElementById('sidebar-footer').className = "mt-6 pt-4 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 transition-colors";
+                document.getElementById('txt-credits').className = "bg-slate-200 text-slate-800 px-2 py-1 rounded-md font-mono";
+
+                document.getElementById('mode-selector-bg').className = "grid grid-cols-4 gap-1 bg-white p-1 rounded-xl border border-slate-200";
+                document.getElementById('enhance-target-bg').className = "grid grid-cols-2 gap-1 bg-white p-1 rounded-lg border border-slate-200";
+                document.getElementById('upload-box').className = "border-2 border-dashed border-slate-300 hover:border-indigo-500/50 rounded-xl p-4 bg-white text-center cursor-pointer transition-colors relative group";
+                document.getElementById('promptInput').className = "w-full h-24 px-4 py-3 bg-white text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-colors";
+                document.getElementById('negativeInput').className = "w-full px-4 py-2.5 bg-white text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors";
+                document.getElementById('ratio-selector-bg').className = "grid grid-cols-3 gap-1 text-center bg-white p-1 rounded-xl border border-slate-200";
+                document.getElementById('batch-selector-bg').className = "grid grid-cols-4 gap-1 text-center bg-white p-1 rounded-xl border border-slate-200";
+                document.getElementById('theme-selector-bg').className = "grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200";
+                
+                document.getElementById('txt-gallery-title').className = "text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2";
+
+                document.querySelectorAll('#galleryGrid > div').forEach(card => {
+                    card.className = "bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between group relative hover:border-slate-300 transition-all duration-300";
+                });
+                document.querySelectorAll('[id^="card-info-"]').forEach(el => el.className = "p-4 bg-white flex-1 flex flex-col justify-between gap-3 transition-colors");
+                document.querySelectorAll('[id^="card-txt-"]').forEach(el => el.className = "text-xs text-slate-700 italic line-clamp-2");
+                document.querySelectorAll('[id^="card-footer-"]').forEach(el => el.className = "flex items-center justify-between pt-2.5 border-t border-slate-100");
+            } else {
+                currentTheme = 'dark';
+                root.classList.add('dark');
+                
+                body.className = "bg-slate-950 text-slate-50 min-h-screen font-sans antialiased transition-colors duration-300 relative";
+                sidebar.className = "w-full md:w-[400px] border-b md:border-b-0 border-slate-800 bg-slate-900/50 p-6 flex flex-col justify-between shrink-0 transition-colors duration-300";
+                main.className = "flex-1 bg-slate-950 p-8 transition-colors duration-300";
+                modal.className = "bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform scale-100 transition-all duration-300 text-slate-50";
+                
+                document.getElementById('settings-header').className = "px-6 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-950";
+                document.getElementById('settings-footer').className = "px-6 py-4 border-t border-slate-800 bg-slate-950 flex justify-end";
+                
+                // Dark mode layouts for custom overlay selection dropdown
+                document.getElementById('custom-lang-trigger').className = "w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-colors flex justify-between items-center";
+                document.getElementById('custom-lang-dropdown').className = "hidden absolute left-0 right-0 mt-1 bg-slate-900 border-2 border-slate-800 rounded-xl overflow-hidden z-50 shadow-2xl transition-all duration-200 origin-top transform scale-y-95 opacity-0";
+                document.getElementById('lang-options-box').className = "divide-y divide-slate-800/60 max-h-[240px] overflow-y-auto";
+                document.querySelectorAll('.lang-option').forEach(el => {
+                    el.classList.remove('text-slate-700', 'hover:bg-slate-50');
+                    el.classList.add('text-slate-200', 'hover:bg-slate-950');
+                });
+
+                document.getElementById('setting-key-input').className = "w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 placeholder-slate-700 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors";
+                document.getElementById('btn-settings').className = "text-slate-400 hover:text-indigo-400 transition-colors p-2 bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl cursor-pointer shrink-0 shadow-sm";
+                document.getElementById('sidebar-hr-1').className = "border-slate-800";
+                document.getElementById('settings-hr').className = "border-slate-800";
+                document.getElementById('sidebar-footer').className = "mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400 transition-colors";
+                document.getElementById('txt-credits').className = "bg-slate-800 text-slate-200 px-2 py-1 rounded-md font-mono";
+
+                document.getElementById('mode-selector-bg').className = "grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800";
+                document.getElementById('enhance-target-bg').className = "grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800";
+                document.getElementById('upload-box').className = "border-2 border-dashed border-slate-800 hover:border-indigo-500/50 rounded-xl p-4 bg-slate-950/50 text-center cursor-pointer transition-colors relative group";
+                document.getElementById('promptInput').className = "w-full h-24 px-4 py-3 bg-slate-950 text-sm text-slate-200 placeholder-slate-600 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-colors";
+                document.getElementById('negativeInput').className = "w-full px-4 py-2.5 bg-slate-950 text-sm text-slate-200 placeholder-slate-700 rounded-xl border border-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors";
+                document.getElementById('ratio-selector-bg').className = "grid grid-cols-3 gap-1 text-center bg-slate-950 p-1 rounded-xl border border-slate-800";
+                document.getElementById('batch-selector-bg').className = "grid grid-cols-4 gap-1 text-center bg-slate-950 p-1 rounded-xl border border-slate-800";
+                document.getElementById('theme-selector-bg').className = "grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800";
+                
+                document.getElementById('txt-gallery-title').className = "text-xl font-bold text-slate-100 tracking-tight flex items-center gap-2";
+
+                document.querySelectorAll('#galleryGrid > div').forEach(card => {
+                    card.className = "bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group relative hover:border-slate-700/50 transition-all duration-300";
+                });
+                document.querySelectorAll('[id^="card-info-"]').forEach(el => el.className = "p-4 bg-slate-900/90 flex-1 flex flex-col justify-between gap-3 transition-colors");
+                document.querySelectorAll('[id^="card-txt-"]').forEach(el => el.className = "text-xs text-slate-300 italic line-clamp-2");
+                document.querySelectorAll('[id^="card-footer-"]').forEach(el => el.className = "flex items-center justify-between pt-2.5 border-t border-slate-800/80");
+            }
+            updateUIForMode(activeMode);
+            updateCustomLangSelectionUI(currentLang);
+            calculateTotalCost();
+        }
+
+        function updateUIForMode(mode) {
+            activeMode = mode;
+            const dict = i18n[currentLang];
+            const baseInactive = currentTheme === 'light' ? inactiveClassLight : inactiveClassDark;
+            
+            tabImg.className = (mode === 'image') ? activeClass : baseInactive;
+            tabVid.className = (mode === 'video') ? activeClass : baseInactive;
+            tabMimic.className = (mode === 'mimic') ? activeClass : baseInactive;
+            tabUpscale.className = (mode === 'upscale') ? activeClass : baseInactive;
+
+            promptContainer.style.display = "block";
+            negativeContainer.style.display = "block";
+            styleContainer.style.display = "block";
+            batchContainer.style.display = "block";
+            enhanceSubSelector.classList.add('hidden');
+            fileInput.setAttribute('accept', 'image/*');
+
+            if (mode === 'image') {
+                lblUpload.innerText = currentLang === 'he' ? "📁 תמונת מקור (אופציונלי)" : (currentLang === 'en' ? "📁 Source Image (Optional)" : dict.uploadLbl);
+                txtUploadMain.innerText = dict.uploadMain;
+                promptInput.placeholder = dict.placeholderPrompt;
+                txtBtnGenerate.innerText = dict.generateImg;
+            } else if (mode === 'video') {
+                lblUpload.innerText = currentLang === 'he' ? "📁 תמונה להפיכה לסרטון (אופציונלי)" : (currentLang === 'en' ? "📁 Source Image to Video (Optional)" : dict.uploadLbl);
+                txtUploadMain.innerText = dict.uploadMain;
+                promptInput.placeholder = currentLang === 'he' ? "דרקון מלכותי עף בשמיים סוערים..." : (currentLang === 'en' ? "Majestic dragon flying through stormy skies..." : "...");
+                txtBtnGenerate.innerText = dict.generateVid;
+            } else if (mode === 'mimic') {
+                lblUpload.innerText = dict.uploadLbl;
+                txtUploadMain.innerText = dict.uploadMain;
+                promptInput.placeholder = currentLang === 'he' ? "תיאור התאמת תנועה (אופציונלי)..." : "📥 ...";
+                txtBtnGenerate.innerText = dict.runMimic;
+            } else if (mode === 'upscale') {
+                enhanceSubSelector.classList.remove('hidden');
+                promptContainer.style.display = "none";
+                negativeContainer.style.display = "none";
+                styleContainer.style.display = "none";
+                batchContainer.style.display = "none";
+                currentBatch = 1;
+                updateEnhanceTargetUI();
+            }
+            calculateTotalCost();
+            updateStyleButtonsUI();
+            updateBatchButtonsUI();
+            lucide.createIcons();
+        }
+
+        function updateEnhanceTargetUI() {
+            const baseSubInactive = currentTheme === 'light' ? subInactiveLight : subInactiveDark;
+            targetImgBtn.className = (enhanceTarget === 'image') ? subActive : baseSubInactive;
+            targetVidBtn.className = (enhanceTarget === 'video') ? subActive : baseSubInactive;
+            const dict = i18n[currentLang];
+
+            if (enhanceTarget === 'image') {
+                lblUpload.innerText = currentLang === 'he' ? "📁 העלאת תמונה באיכות נמוכה לשדרוג על" : (currentLang === 'en' ? "📁 Upload low-res image for Ultra enhancement" : dict.uploadLbl);
+                txtUploadMain.innerText = currentLang === 'he' ? "לחצו להעלאת תמונה עבור Ultra HD 🖼️" : (currentLang === 'en' ? "Click to upload image for Ultra HD 🖼️" : dict.uploadMain);
+                txtBtnGenerate.innerText = dict.upscaleImgBtn;
+                fileInput.setAttribute('accept', 'image/*');
+            } else {
+                lblUpload.innerText = currentLang === 'he' ? "📁 העלאת סרטון באיכות נמוכה לשדרוג AI" : (currentLang === 'en' ? "📁 Upload low-res video for AI enhancement" : dict.uploadLbl);
+                txtUploadMain.innerText = currentLang === 'he' ? "לחצו להעלאת סרטון עבור Ultra HD 🎬" : (currentLang === 'en' ? "Click to upload video for Ultra HD 🎬" : dict.uploadMain);
+                txtBtnGenerate.innerText = dict.upscaleVidBtn;
+                fileInput.setAttribute('accept', 'video/*');
+            }
+            calculateTotalCost();
+            lucide.createIcons();
+        }
+
+        function updateStyleButtonsUI() {
+            const btns = document.querySelectorAll('.style-btn');
+            btns.forEach(btn => {
+                const isSelected = btn.classList.contains('border-indigo-500');
+                if (!isSelected) {
+                    btn.className = `style-btn text-xs py-2 rounded-lg border font-medium cursor-pointer transition-all ${currentTheme === 'light' ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900'}`;
+                }
+            });
+        }
+
+        function updateBatchButtonsUI() {
+            const btns = document.querySelectorAll('.batch-btn');
+            btns.forEach(btn => {
+                const isSelected = btn.classList.contains('border-indigo-500');
+                if (!isSelected) {
+                    btn.className = `batch-btn text-[11px] py-1.5 rounded-lg border border-transparent cursor-pointer ${currentTheme === 'light' ? 'text-slate-500 hover:bg-slate-200' : 'text-slate-400 hover:bg-slate-900'}`;
+                }
+            });
+        }
+
+        tabImg.addEventListener('click', function() { updateUIForMode('image'); });
+        tabVid.addEventListener('click', function() { updateUIForMode('video'); });
+        tabMimic.addEventListener('click', function() { updateUIForMode('mimic'); });
+        tabUpscale.addEventListener('click', function() { updateUIForMode('upscale'); });
+
+        targetImgBtn.addEventListener('click', function() { enhanceTarget = 'image'; updateEnhanceTargetUI(); });
+        targetVidBtn.addEventListener('click', function() { enhanceTarget = 'video'; updateEnhanceTargetUI(); });
+        
+        qualitySlider.addEventListener('input', calculateTotalCost);
+
+        document.getElementById('theme-light').addEventListener('click', () => applyTheme('light'));
+        document.getElementById('theme-dark').addEventListener('click', () => applyTheme('dark'));
+        document.getElementById('theme-auto').addEventListener('click', () => applyTheme('auto'));
+
+        const styleButtons = document.querySelectorAll('.style-btn');
+        styleButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                styleButtons.forEach(b => {
+                    b.className = `style-btn text-xs py-2 rounded-lg border font-medium cursor-pointer transition-all ${currentTheme === 'light' ? 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' : 'border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900'}`;
+                });
+                btn.className = "style-btn text-xs py-2 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 font-medium cursor-pointer transition-all";
+            });
+        });
+
+        const batchButtons = document.querySelectorAll('.batch-btn');
+        batchButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                batchButtons.forEach(b => {
+                    b.className = `batch-btn text-[11px] py-1.5 rounded-lg border border-transparent cursor-pointer ${currentTheme === 'light' ? 'text-slate-500 hover:bg-slate-200' : 'text-slate-400 hover:bg-slate-900'}`;
+                });
+                btn.className = "batch-btn text-[11px] py-1.5 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 cursor-pointer";
+                currentBatch = parseInt(btn.getAttribute('data-batch'));
+                calculateTotalCost();
+            });
+        });
+
+        document.getElementById('btn-enhance-prompt').addEventListener('click', function() {
+            if(!promptInput.value.trim()) promptInput.value = "Powerful cyberpunk warrior standing in a rainy neon market";
+            promptInput.value += ", photo-realistic, high detail, cinematic quality, masterpiece, 8k 🪄";
+        });
+
+        const r1 = document.getElementById('ratio-1'); 
+        const r2 = document.getElementById('ratio-2'); 
+        const r3 = document.getElementById('ratio-3');
+        const ratioActive = "ratio-btn text-[11px] py-1.5 rounded-lg border border-indigo-500 bg-indigo-500/10 text-indigo-400 cursor-pointer";
+        
+        function getRatioInactive() {
+            return `ratio-btn text-[11px] py-1.5 rounded-lg border border-transparent cursor-pointer ${currentTheme === 'light' ? 'text-slate-500 hover:bg-slate-200' : 'text-slate-400 hover:bg-slate-900'}`;
+        }
+        
+        function setRatio(activeBtn) { 
+            r1.className = getRatioInactive(); r2.className = getRatioInactive(); r3.className = getRatioInactive(); 
+            activeBtn.className = ratioActive; 
+        }
+        r1.addEventListener('click', function() { setRatio(r1); }); 
+        r2.addEventListener('click', function() { setRatio(r2); }); 
+        r3.addEventListener('click', function() { setRatio(r3); });
+
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox'); 
+            const lbImg = document.getElementById('lightboxImg');
+            lbImg.src = src; 
+            lb.classList.remove('hidden'); 
+            lb.classList.add('flex');
+            setTimeout(() => lb.classList.add('opacity-100'), 10);
+        }
+        
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox'); 
+            lb.classList.remove('opacity-100');
+            setTimeout(() => { lb.classList.add('hidden'); lb.classList.remove('flex'); }, 300);
+        }
+
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsContent = document.getElementById('settings-content');
+        const btnSettings = document.getElementById('btn-settings');
+        const closeSettings = document.getElementById('close-settings');
+        const saveSettings = document.getElementById('save-settings');
+
+        function openSettings() {
+            settingsModal.classList.remove('hidden');
+            settingsModal.classList.add('flex');
+            setTimeout(() => {
+                settingsModal.classList.add('opacity-100');
+                settingsContent.classList.remove('scale-95');
+                settingsContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.remove('opacity-100');
+            settingsContent.classList.remove('scale-100');
+            settingsContent.classList.add('scale-95');
+            setTimeout(() => {
+                settingsModal.classList.add('hidden');
+                settingsModal.classList.remove('flex');
+            }, 300);
+            closeCustomLangDropdown();
+        }
+
+        btnSettings.addEventListener('click', openSettings);
+        closeSettings.addEventListener('click', closeSettingsModal);
+        
+        saveSettings.addEventListener('click', () => {
+            closeSettingsModal();
+            setTimeout(() => showToast(i18n[currentLang].alertSaved), 300);
+        });
+
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+
+        function copyText(text) { 
+            navigator.clipboard.writeText(text); 
+            showToast(i18n[currentLang].alertCopied); 
+        }
+
+        function downloadMedia(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.target = '_blank'; 
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        const samplePool = [
+            "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?w=600",
+            "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600",
+            "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600",
+            "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=600",
+            "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600"
+        ];
+
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const grid = document.getElementById('galleryGrid');
+            const promptVal = promptInput.value.trim() || (activeMode === 'upscale' ? "Premium quality enhancement" : "Original digital artwork");
+            const randomImg = samplePool[Math.floor(Math.random() * samplePool.length)];
+            const randomId = Math.floor(1000 + Math.random() * 9000);
+            
+            let displayMode = activeMode;
+            if (activeMode === 'upscale') {
+                displayMode = (enhanceTarget === 'image') ? '🖼️ Upscale Image' : '🎬 Upscale Video';
+            } else if (activeMode === 'image') {
+                displayMode = '🖼️ Image';
+            } else if (activeMode === 'video') {
+                displayMode = '🎬 Video';
+            }
+
+            const card = document.createElement('div');
+            const cardId = `card-generated-${randomId}`;
+            const infoId = `card-info-${randomId}`;
+            const txtId = `card-txt-${randomId}`;
+            const footerId = `card-footer-${randomId}`;
+
+            const cardClass = currentTheme === 'light' ? "bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-md flex flex-col justify-between group relative hover:border-slate-300 transition-all duration-300" : "bg-slate-900 border border-slate-800/80 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between group relative hover:border-slate-700/50 transition-all duration-300";
+            const infoClass = currentTheme === 'light' ? "p-4 bg-white flex-1 flex flex-col justify-between gap-3 transition-colors" : "p-4 bg-slate-900/90 flex-1 flex flex-col justify-between gap-3 transition-colors";
+            const txtClass = currentTheme === 'light' ? "text-xs text-slate-700 italic line-clamp-2" : "text-xs text-slate-300 italic line-clamp-2";
+            const footerClass = currentTheme === 'light' ? "flex items-center justify-between pt-2.5 border-t border-slate-100" : "flex items-center justify-between pt-2.5 border-t border-slate-800/80";
+
+            card.id = cardId;
+            card.className = cardClass;
+            
+            card.innerHTML = `
+                <div class="aspect-square w-full bg-slate-950 relative overflow-hidden">
+                    <img src="${randomImg}" class="object-cover w-full h-full cursor-pointer group-hover:scale-[1.02] transition-transform duration-500" onclick="openLightbox(this.src)">
+                    <div class="absolute top-3 right-3 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1.5">
+                        <button onclick="copyText('${promptVal.replace(/'/g, "\\'")}')" class="p-2 bg-slate-950/80 hover:bg-indigo-600 rounded-xl text-slate-200 border border-slate-800 transition-all cursor-pointer">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+                        <button onclick="downloadMedia('${randomImg}', 'project-${randomId}.jpg')" class="p-2 bg-slate-950/80 hover:bg-emerald-600 rounded-xl text-slate-200 border border-slate-800 transition-all cursor-pointer">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="${infoId}" class="${infoClass}">
+                    <p id="${txtId}" class="${txtClass}">"${promptVal}"</p>
+                    <div id="${footerId}" class="${footerClass}">
+                        <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">${displayMode}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">#${randomId}</span>
+                    </div>
+                </div>
+            `;
+            
+            grid.insertBefore(card, grid.firstChild);
+            lucide.createIcons();
+            
+            showToast(i18n[currentLang].alertDone);
+        });
+
+        // Initialize Application states explicitly
+        applyLanguage('en');
+        applyTheme('dark'); 
+    </script>
+</body>
+</html>
